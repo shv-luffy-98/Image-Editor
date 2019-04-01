@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,16 @@ public class EditorView extends AppCompatActivity {
 
         thumbListView.setLayoutManager(lm);
         thumbListView.setHasFixedSize(true);
+        thumbListView.addOnItemTouchListener(new CustomRVItemTouchListener(this, thumbListView, new RecyclerViewItemClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Toast.makeText(getBaseContext(), Integer.toString(position), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+            }
+        }));
     }
     public List<Filter> createFilters() {
         List<Filter> filters = new ArrayList<>();
