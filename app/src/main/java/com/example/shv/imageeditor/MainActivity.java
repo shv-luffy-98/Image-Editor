@@ -45,25 +45,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK ) {
-            ImageView imageView = (ImageView) findViewById(R.id.tempImage);
-            int targetW = imageView.getWidth();
-            int targetH = imageView.getHeight();
-
-            // Get the dimensions of the bitmap
-            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-            bmOptions.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
-            int photoW = bmOptions.outWidth;
-            int photoH = bmOptions.outHeight;
-            int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-            // Decode the image file into a Bitmap sized to fill the View
-            bmOptions.inJustDecodeBounds = false;
-            bmOptions.inSampleSize = scaleFactor;
-            bmOptions.inPurgeable = true;
-
-            Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
-            imageView.setImageBitmap(bitmap);
+            Intent intent = new Intent(getBaseContext(), EditorView.class);
+            intent.putExtra("photoPath", currentPhotoPath);
+            startActivity(intent);
         }
     }
     private File createImageFile() throws IOException {
