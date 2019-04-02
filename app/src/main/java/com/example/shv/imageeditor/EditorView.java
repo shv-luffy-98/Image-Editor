@@ -18,7 +18,7 @@ public class EditorView extends AppCompatActivity {
     private List<Filter> filters;
     private RecyclerView thumbListView;
     private ImageView originalView;
-    private Bitmap originalImage;
+    private Bitmap originalImage, tempImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,17 +74,18 @@ public class EditorView extends AppCompatActivity {
         int matrix[][] = filters.get(position).filterMatrix;
         int size = filters.get(position).size;
         int factor = filters.get(position).factor;
+        int s2 = size/2;
 
         Bitmap temp = Bitmap.createBitmap(width, height, originalImage.getConfig());
         int A, R, G, B;
         int sumR, sumG, sumB;
-        int[][] pixels = new int[3][3];
+        int[][] pixels = new int[size][size];
 
-        for(int y = 1; y < height - 1; ++y) {
-            for(int x = 1; x < width - 1; ++x) {
+        for(int y = s2; y < height - s2; ++y) {
+            for(int x = s2; x < width - s2; ++x) {
                 for(int i = 0; i < size; ++i) {
                     for(int j = 0; j < size; ++j) {
-                        pixels[i][j] = originalImage.getPixel(x + i - 1, y + j - 1);
+                        pixels[i][j] = originalImage.getPixel(x + i - s2, y + j - s2);
                     }
                 }
                 A = Color.alpha(pixels[1][1]);
@@ -103,7 +104,7 @@ public class EditorView extends AppCompatActivity {
                 G = sumG / factor;
                 B = sumB / factor;
 
-                if(position == 5) {
+                if(position == 6) {
                     R += 128;
                     G += 128;
                     B += 128;
@@ -121,13 +122,16 @@ public class EditorView extends AppCompatActivity {
             }
         }
         imageDisplay(temp);
+        tempImage = temp;
     }
+
     public void imageDisplay(Bitmap image){
         originalView.setImageBitmap(image);
     }
     public void imageDisplay(){
         originalView.setImageBitmap(originalImage);
     }
+
     public List<Filter> createFilters() {
         List<Filter> filters = new ArrayList<>();
         int a[][] = new int[][] {
@@ -142,21 +146,30 @@ public class EditorView extends AppCompatActivity {
             {1, 1, 1},
             {1, 1, 1}
         };
-        filters.add(new Filter("Blur", a, 3, 9));
+        filters.add(new Filter("Blur 3x3", a, 3, 9));
+
+        a = new int[][] {
+                {1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1}
+        };
+        filters.add(new Filter("Blur 5x5", a, 5, 25));
 
         a = new int[][] {
                 {-1, -1, -1},
                 {-1, 8, -1},
                 {-1, -1, -1}
         };
-        filters.add(new Filter("Edges", a, 3, 1));
+        filters.add(new Filter("Edge Detect", a, 3, 1));
 
         a = new int[][] {
                 {1, 0, 0},
                 {0, 1, 0},
                 {0, 0, 1}
         };
-        filters.add(new Filter("Motion", a, 3, 3));
+        filters.add(new Filter("Motion Blur", a, 3, 3));
 
         a = new int[][] {
                 {-1, -1, -1},

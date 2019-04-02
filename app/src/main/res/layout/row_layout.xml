@@ -2,25 +2,26 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardView"
-    android:layout_width="150dp"
-    android:layout_height="match_parent"
-    android:layout_marginLeft="2dp"
-    android:layout_marginRight="2dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    app:cardElevation="@dimen/cardview_compat_inset_shadow"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:layout_marginRight="2dp"
+    app:cardCornerRadius="6dp"
+    app:cardElevation="3dp"
     >
 
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:padding="6dp">
+        android:layout_width="95dp"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/card_title"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="50dp"
             android:text="@string/row_text"
-            android:textSize="30sp" />
+            android:textSize="20sp" />
     </RelativeLayout>
 </android.support.v7.widget.CardView>
