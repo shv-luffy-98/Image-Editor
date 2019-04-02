@@ -14,12 +14,14 @@ import android.os.ParcelFileDescriptor;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.File;
@@ -36,10 +38,18 @@ import static com.example.shv.imageeditor.MainActivity.selectedImage;
 
 public class EditorView extends AppCompatActivity {
     public Button apply, save;
+    public int redV, greenV, blueV;
+    public int isInc;
+    public boolean bnw;
+    private boolean changed_rbgVs;
     private List<Filter> filters;
     private RecyclerView thumbListView;
     private ImageView originalView;
     private Bitmap originalImage, tempImage;
+    private SeekBar redBar, greenBar, blueBar;
+    private CardView colorAdjust;
+    private LinearLayoutManager lm;
+    private int redMax, redMin, greenMax, greenMin, blueMax, blueMin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,13 +58,17 @@ public class EditorView extends AppCompatActivity {
         originalView = (ImageView) findViewById(R.id.originalImage);
         apply = (Button) findViewById(R.id.Apply);
         save = (Button) findViewById(R.id.Save);
+        redBar = (SeekBar) findViewById(R.id.redBar);
+        greenBar = (SeekBar) findViewById(R.id.greenBar);
+        blueBar = (SeekBar) findViewById(R.id.blueBar);
+        colorAdjust = (CardView) findViewById(R.id.colorAdjust);
 
         filters = createFilters();
         thumbListView = (RecyclerView) findViewById(R.id.filterRecyclerView);
         RecyclerAdapter adapter = new RecyclerAdapter(filters, getApplication());
         thumbListView.setAdapter(adapter);
 
-        LinearLayoutManager lm = new LinearLayoutManager(this);
+        lm = new LinearLayoutManager(this);
         lm.setOrientation(LinearLayoutManager.HORIZONTAL);
 
         thumbListView.setLayoutManager(lm);
@@ -63,9 +77,57 @@ public class EditorView extends AppCompatActivity {
             @Override
             public void onClick(View view, int position) {
                 if (position == 0) {
+                    colorAdjust.setVisibility(View.INVISIBLE);
                     EditorView.this.imageDisplay();
                     EditorView.this.apply.setEnabled(false);
+                } else if (position == 7) {
+                    colorAdjust.setVisibility(View.VISIBLE);
+                    redV = blueV = greenV = 0;
+                    EditorView.this.blackNWhite();
+                    redBar.setMax(1);
+                    redBar.setProgress(0);
+
+                    greenBar.setMax(1);
+                    greenBar.setProgress(0);
+
+                    blueBar.setMax(1);
+                    blueBar.setProgress(0);
+                    EditorView.this.bnw = true;
+                    EditorView.this.apply.setEnabled(true);
+                } else if (position == 8) {
+                    EditorView.this.imageDisplay();
+                    EditorView.this.tempImage = Bitmap.createBitmap(originalImage);
+                    EditorView.this.findMin();
+                    EditorView.this.isInc = 1;
+                    redBar.setMax(255 - redMin);
+                    redBar.setProgress(0);
+
+                    greenBar.setMax(255 - greenMin);
+                    greenBar.setProgress(0);
+
+                    blueBar.setMax(255 - blueMin);
+                    blueBar.setProgress(0);
+
+                    EditorView.this.bnw = false;
+                    colorAdjust.setVisibility(View.VISIBLE);
+                } else if (position == 9) {
+                    EditorView.this.imageDisplay();
+                    EditorView.this.tempImage = Bitmap.createBitmap(originalImage);
+                    EditorView.this.findMax();
+                    EditorView.this.isInc = -1;
+                    redBar.setMax(redMax);
+                    redBar.setProgress(redMax);
+
+                    greenBar.setMax(greenMax);
+                    greenBar.setProgress(greenMax);
+
+                    blueBar.setMax(blueMax);
+                    blueBar.setProgress(blueMax);
+
+                    EditorView.this.bnw = false;
+                    colorAdjust.setVisibility(View.VISIBLE);
                 } else {
+                    colorAdjust.setVisibility(View.INVISIBLE);
                     EditorView.this.applyFilter(position);
                     EditorView.this.apply.setEnabled(true);
                 }
@@ -73,10 +135,206 @@ public class EditorView extends AppCompatActivity {
 
             @Override
             public void onLongClick(View view, int position) {
-                ;
             }
         }));
+        redBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                EditorView.this.redV = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (bnw) {
+                    EditorView.this.blackNWhite();
+                } else {
+                    if (isInc == -1)
+                        redV = 255 - redV;
+                    EditorView.this.apply.setEnabled(true);
+                    EditorView.this.colorViewR();
+                }
+            }
+        });
+        greenBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                EditorView.this.greenV = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (bnw) {
+                    EditorView.this.blackNWhite();
+                } else {
+                    if (isInc == -1)
+                        greenV = 255 - greenV;
+                    EditorView.this.colorViewG();
+                    EditorView.this.apply.setEnabled(true);
+                }
+            }
+        });
+        blueBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                EditorView.this.blueV = progress;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (bnw) {
+                    EditorView.this.blackNWhite();
+                } else {
+                    if (isInc == -1)
+                        blueV = 255 - blueV;
+                    EditorView.this.colorViewB();
+                    EditorView.this.apply.setEnabled(true);
+                }
+            }
+        });
         initImage();
+    }
+
+    public void findMax() {
+        int height = originalImage.getHeight();
+        int width = originalImage.getWidth();
+        int pixel, c;
+        redMax = greenMax = blueMax = 0;
+        for (int i = 0; i < width; ++i)
+            for (int j = 0; j < height; ++j) {
+                pixel = originalImage.getPixel(i, j);
+
+                c = Color.red(pixel);
+                if (c > redMax)
+                    redMax = c;
+
+                c = Color.green(pixel);
+                if (c > greenMax)
+                    greenMax = c;
+
+                c = Color.blue(pixel);
+                if (c > blueMax)
+                    blueMax = c;
+            }
+    }
+
+    public void findMin() {
+        int height = originalImage.getHeight();
+        int width = originalImage.getWidth();
+        int pixel, c;
+        blueMin = greenMin = redMin = 1000;
+        for (int i = 0; i < width; ++i)
+            for (int j = 0; j < height; ++j) {
+                pixel = originalImage.getPixel(i, j);
+
+                c = Color.red(pixel);
+                if (c < redMin)
+                    redMin = c;
+
+                c = Color.green(pixel);
+                if (c < greenMin)
+                    greenMin = c;
+
+                c = Color.blue(pixel);
+                if (c < blueMin)
+                    blueMin = c;
+            }
+    }
+
+    public void blackNWhite() {
+        if (redV != 1 && blueV != 1 && greenV != 1) {
+            redV = blueV = greenV = 1;
+            changed_rbgVs = true;
+        } else
+            changed_rbgVs = false;
+        int height = originalImage.getHeight();
+        int width = originalImage.getWidth();
+        int pixel, val;
+
+        for (int i = 0; i < width; ++i)
+            for (int j = 0; j < height; ++j) {
+                pixel = originalImage.getPixel(i, j);
+                val = (Color.red(pixel) * redV + Color.green(pixel) * greenV + Color.blue(pixel) * blueV)
+                        / (redV + blueV + greenV);
+                tempImage.setPixel(i, j, Color.argb(Color.alpha(pixel), val, val, val));
+            }
+        imageDisplay(tempImage);
+        if (changed_rbgVs)
+            redV = blueV = greenV = 0;
+    }
+
+    public void colorViewR() {
+        int height = originalImage.getHeight();
+        int width = originalImage.getWidth();
+        int pixel, a, r, g, b;
+        for (int i = 0; i < width; ++i)
+            for (int j = 0; j < height; ++j) {
+                pixel = tempImage.getPixel(i, j);
+                a = Color.alpha(pixel);
+                g = Color.green(pixel);
+                b = Color.blue(pixel);
+                r = Color.red(originalImage.getPixel(i, j));
+                r = r + (isInc * redV);
+                if (r > 255)
+                    r = 255;
+                if (r < 0)
+                    r = 0;
+                tempImage.setPixel(i, j, Color.argb(a, r, g, b));
+            }
+        imageDisplay(tempImage);
+    }
+
+    public void colorViewG() {
+        int height = originalImage.getHeight();
+        int width = originalImage.getWidth();
+        int pixel, a, r, g, b;
+        for (int i = 0; i < width; ++i)
+            for (int j = 0; j < height; ++j) {
+                pixel = tempImage.getPixel(i, j);
+                a = Color.alpha(pixel);
+                r = Color.red(pixel);
+                b = Color.blue(pixel);
+                g = Color.green(originalImage.getPixel(i, j));
+                g = g + (isInc * greenV);
+                if (g > 255)
+                    g = 255;
+                if (g < 0)
+                    g = 0;
+                tempImage.setPixel(i, j, Color.argb(a, r, g, b));
+            }
+        imageDisplay(tempImage);
+    }
+
+    public void colorViewB() {
+        int height = originalImage.getHeight();
+        int width = originalImage.getWidth();
+        int pixel, a, r, g, b;
+        for (int i = 0; i < width; ++i)
+            for (int j = 0; j < height; ++j) {
+                pixel = tempImage.getPixel(i, j);
+                a = Color.alpha(pixel);
+                g = Color.green(pixel);
+                r = Color.red(pixel);
+                b = Color.blue(originalImage.getPixel(i, j));
+                b = b + (isInc * blueV);
+                if (b > 255)
+                    b = 255;
+                if (b < 0)
+                    b = 0;
+                tempImage.setPixel(i, j, Color.argb(a, r, g, b));
+            }
+        imageDisplay(tempImage);
     }
 
     private void initImage() {
@@ -102,7 +360,7 @@ public class EditorView extends AppCompatActivity {
                 e.printStackTrace();
             }
             originalImage = Bitmap.createBitmap(bmp);
-
+            tempImage = Bitmap.createBitmap(originalImage);
             imageDisplay();
         }
     }
@@ -195,9 +453,12 @@ public class EditorView extends AppCompatActivity {
         originalImage = Bitmap.createBitmap(tempImage);
         save.setEnabled(true);
         apply.setEnabled(false);
+        lm.scrollToPosition(0);
+        colorAdjust.setVisibility(View.INVISIBLE);
     }
 
     public void saveChanges(View view) {
+        applyChanges(view);
         if (storagePermissionGranted()) {
             storeImage();
         }
@@ -281,7 +542,7 @@ public class EditorView extends AppCompatActivity {
                 {1, 1, 1},
                 {1, 1, 1}
         };
-        filters.add(new Filter("Gauss Blur 1", a, 3, 9));
+        filters.add(new Filter("Gauss Blur 3x3", a, 3, 9));
 
         a = new int[][]{
                 {1, 1, 1, 1, 1},
@@ -290,7 +551,7 @@ public class EditorView extends AppCompatActivity {
                 {1, 1, 1, 1, 1},
                 {1, 1, 1, 1, 1}
         };
-        filters.add(new Filter("Gauss Blur 2", a, 5, 25));
+        filters.add(new Filter("Gauss Blur 5x5", a, 5, 25));
 
         a = new int[][]{
                 {-1, -1, -1},
@@ -300,11 +561,13 @@ public class EditorView extends AppCompatActivity {
         filters.add(new Filter("Edge Detect", a, 3, 1));
 
         a = new int[][]{
-                {1, 0, 0},
-                {0, 1, 0},
-                {0, 0, 1}
+                {1, 0, 0, 0, 0},
+                {0, 1, 0, 0, 0},
+                {0, 0, 1, 0, 0},
+                {0, 0, 0, 1, 0},
+                {0, 0, 0, 0, 1}
         };
-        filters.add(new Filter("Motion Blur", a, 3, 3));
+        filters.add(new Filter("Motion Blur", a, 5, 5));
 
         a = new int[][]{
                 {-1, -1, -1},
@@ -319,6 +582,24 @@ public class EditorView extends AppCompatActivity {
                 {0, 1, 1}
         };
         filters.add(new Filter("Emboss", a, 3, 1));
+
+        a = new int[][]{
+                {1, 1},
+                {1, 1}
+        };
+        filters.add(new Filter("Black n White", a, 2, 4));
+
+        a = new int[][]{
+                {1, 1},
+                {1, 1}
+        };
+        filters.add(new Filter("Color inc", a, 2, 4));
+
+        a = new int[][]{
+                {1, 1},
+                {1, 1}
+        };
+        filters.add(new Filter("Color dec", a, 2, 4));
         return filters;
     }
 }
