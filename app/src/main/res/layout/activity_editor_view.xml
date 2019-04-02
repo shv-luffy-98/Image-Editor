@@ -7,32 +7,16 @@
     tools:context=".EditorView">
 
     <ImageView
-        android:id="@+id/editImage"
-        android:layout_width="300dp"
-        android:layout_height="400dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:contentDescription="Editing Image"
-        app:layout_constraintBottom_toTopOf="@+id/filterRecyclerView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@color/cardview_light_background" />
-
-    <ImageView
         android:id="@+id/originalImage"
         android:layout_width="300dp"
         android:layout_height="400dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         android:contentDescription="Original Image"
+        android:foregroundGravity="top"
         android:minWidth="300dp"
-        android:minHeight="300dp"
-        app:layout_constraintBottom_toTopOf="@+id/filterRecyclerView"
+        android:minHeight="400dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -41,12 +25,62 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/filterRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_height="74dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="16dp"
         android:maxHeight="80dp"
         android:minHeight="80dp"
+        app:layout_constraintBottom_toTopOf="@+id/relativeLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+    </android.support.v7.widget.RecyclerView>
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/Apply"
+            android:layout_width="150dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@drawable/buttonshape2"
+            android:clickable="true"
+            android:enabled="false"
+            android:onClick="applyChanges"
+            android:shadowColor="#A8A8A8"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="5"
+            android:text="Apply Changes"
+            android:textColor="#424242"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/Save"
+            android:layout_width="150dp"
+            android:layout_height="45dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/buttonshape2"
+            android:clickable="true"
+            android:enabled="false"
+            android:onClick="saveChanges"
+            android:shadowColor="#A8A8A8"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="5"
+            android:text="Save changes"
+            android:textColor="#424242"
+            android:textSize="14sp" />
+    </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
