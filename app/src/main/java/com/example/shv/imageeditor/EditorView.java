@@ -80,7 +80,7 @@ public class EditorView extends AppCompatActivity {
                     colorAdjust.setVisibility(View.INVISIBLE);
                     EditorView.this.imageDisplay();
                     EditorView.this.apply.setEnabled(false);
-                } else if (position == 7) {
+                } else if (position == 11) {
                     colorAdjust.setVisibility(View.VISIBLE);
                     redV = blueV = greenV = 0;
                     EditorView.this.blackNWhite();
@@ -94,7 +94,7 @@ public class EditorView extends AppCompatActivity {
                     blueBar.setProgress(0);
                     EditorView.this.bnw = true;
                     EditorView.this.apply.setEnabled(true);
-                } else if (position == 8) {
+                } else if (position == 12) {
                     EditorView.this.imageDisplay();
                     EditorView.this.tempImage = Bitmap.createBitmap(originalImage);
                     EditorView.this.findMin();
@@ -110,7 +110,7 @@ public class EditorView extends AppCompatActivity {
 
                     EditorView.this.bnw = false;
                     colorAdjust.setVisibility(View.VISIBLE);
-                } else if (position == 9) {
+                } else if (position == 13) {
                     EditorView.this.imageDisplay();
                     EditorView.this.tempImage = Bitmap.createBitmap(originalImage);
                     EditorView.this.findMax();
@@ -582,6 +582,35 @@ public class EditorView extends AppCompatActivity {
                 {0, 1, 1}
         };
         filters.add(new Filter("Emboss", a, 3, 1));
+
+        a = new int[][]{
+                {-1, 0, 1},
+                {-2, 0, 2},
+                {-1, 0, 1}
+        };
+        filters.add(new Filter("Sobel H", a, 3, 1));
+
+        a = new int[][]{
+                {-1, -2, -1},
+                {0, 0, 0},
+                {1, 2, 1}
+        };
+        filters.add(new Filter("Sobel V", a, 3, 1));
+
+        a = new int[][]{
+                {-1, 0, 1},
+                {-1, 0, 1},
+                {-1, 0, 1}
+        };
+        filters.add(new Filter("Prewitt H", a, 3, 1));
+
+        a = new int[][]{
+                {-1, -1, -1},
+                {0, 0, 0},
+                {1, 1, 1}
+        };
+        filters.add(new Filter("Prewitt V", a, 3, 1));
+
 
         a = new int[][]{
                 {1, 1},
